@@ -16,20 +16,20 @@ const options = {
   disableDefaultUI: true,
   zoomControl: true
 }
-
 const points = [
   { lat: 37.65, lng: 126.80, name: "test1" },
   { lat: 37.6586, lng: 126.8578, name: "test2" }
 ]
-// const res = axios.get('http://3.39.217.105:3000/markers')
 
 function getAllMarkers() {
   return axios.get('http://3.39.217.105:3000/markers')
 }
 
+const serverPoints = []
+
 
 export default function Map() {
-
+  
   const { isLoaded, loadError } = useLoadScript({
     googleMapsApiKey: process.env.REACT_APP_GOOGLE_MAPS_API_KEY,
   });
@@ -46,15 +46,22 @@ export default function Map() {
         name: x.name
       }])
     ));
-
+  }, [])
+  
+  useEffect(() => { 
+    var res = getAllMarkers();
+    res.then(response => response.data.result.map(
+      x => serverPoints.push(
+        {
+          lat: x.coordinates.lat,
+          lng: x.coordinates.lon,
+          name: x.name
+        }
+      )
+    ))
   }, [])
 
-  // var res = getAllMarkers()
-  
-
-
   const onMapClick = useCallback((event) => {
-    console.log(event.latLng.lat())
     setMarkers(current => [...current,{
       lat: event.latLng.lat(),
       lng: event.latLng.lng(),
@@ -79,7 +86,18 @@ export default function Map() {
       onClick={onMapClick}
       onLoad={onMapLoad}
     >
-      {/* 여기를 조건  */}
+      
+      {console.log(serverPoints)}
+      {serverPoints.map(marker =>
+        <Marker
+          key={parseFloat(marker.lat)}
+          position={{ lat: parseFloat(marker.lat), lng: parseFloat(marker.lng) }}
+          onClick={() => {
+            setSelected(marker);
+          }}
+        />
+      )}
+
       {!markers ? null : markers.map(marker =>
         <Marker
           key={parseFloat(marker.lat)}
@@ -89,9 +107,6 @@ export default function Map() {
           }}
         />
       )}
-      {/* 저기 위에 마커태그 (){ }[] 등으로 감싸지 말 것 */}
-      {/* Why is props undefined In React?
-The "cannot set property 'props' of undefined" error occurs when we add an extra set of parenthesis when declaring a class component in React. js. */}
 
       {!selected ? null : (
         <InfoWindow
@@ -105,23 +120,6 @@ The "cannot set property 'props' of undefined" error occurs when we add an extra
           </div>
         </InfoWindow>)}
       
-      {/* {markers.map(marker =>
-        <Marker
-          // key={marker.time.toISOString()}
-          key={marker.lat}
-          position={{ lat: marker.lat, lng: marker.lng }}
-          // icon={{
-          //   //url: "/bear.svg",
-          //   scaledSize: new window.google.maps.Size(30, 30),
-          //   origin: new window.google.maps.Point(0, 0),
-          //   anchor: new window.google.maps.Point(15,15) // 30/2 이게 로고 위에 마우스포인터 정중앙
-          // }} //이걸 어디서 구하지
-          onClick={() => {
-            setSelected(marker);// 마커 좌표 저장
-          }}
-        />
-      )} */}
-
     </GoogleMap>
   </div>
 }
