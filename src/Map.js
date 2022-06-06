@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef } from 'react'
+import React, { useState, useCallback, useRef,useEffect } from 'react'
 import { GoogleMap, useLoadScript, Marker, Polyline, InfoWindow, Data } from '@react-google-maps/api';
 // import { formatRelative } from "data-fns"
 import axios from "axios"
@@ -21,30 +21,37 @@ const points = [
   { lat: 37.65, lng: 126.80, name: "test1" },
   { lat: 37.6586, lng: 126.8578, name: "test2" }
 ]
-const res = axios.get('http://3.39.217.105:3000/markers')
+// const res = axios.get('http://3.39.217.105:3000/markers')
 
 function getAllMarkers() {
   return axios.get('http://3.39.217.105:3000/markers')
 }
+
 
 export default function Map() {
 
   const { isLoaded, loadError } = useLoadScript({
     googleMapsApiKey: process.env.REACT_APP_GOOGLE_MAPS_API_KEY,
   });
-
-  const [markers, setMarkers] = useState(points);
+  
+  const [markers, setMarkers] = useState([]);
   const [selected, setSelected] = useState(null); // 어떤 마커가 선택됐는지
 
-  var res = getAllMarkers()
+  useEffect(() => {
+    var res = getAllMarkers();
+    res.then(response => response.data.result.map(x =>
+      setMarkers(current => [...current, {
+        lat: x.coordinates.lat,
+        lng: x.coordinates.lng,
+        name: x.name
+      }])
+    ));
 
-  // res.then(response => response.data.result.map(x =>
-  //   setMarkers(current => [...current, {
-  //     lat: x.coordinates.lat,
-  //     lng: x.coordinates.lng,
-  //     name: x.name
-  //   }])
-  // ));
+  }, [])
+
+  // var res = getAllMarkers()
+  
+
 
   const onMapClick = useCallback((event) => {
     console.log(event.latLng.lat())
