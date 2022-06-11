@@ -4,31 +4,19 @@ import axios from "axios"
 
 
 const mapContainerStyle = {
-  width: "100vw",
-  height: "100vh",
+  width: "100vw", height: "100vh",
 }
 const center = {
-  lat: 37.560876699999795, lng: 126.8210406999998,
+  lat: 37.56204148687894, lng: 126.83094131509162,
 }
 const options = {
-  disableDefaultUI: true,
-  zoomControl: true
+  disableDefaultUI: true, zoomControl: true
 }
 
-const serverPoints = []
-function getAllMarkers() {
-  return axios.get('http://3.39.217.105:3000/markers')
-}
-
-
-const dummy = [
-  { lat: 37.6584, lng: 126.8320, name: "주차장 1", category: "parking", },
-  { lat: 37.65, lng: 126.83, name: "주차장 2", category: "parking", },
-  { lat: 37.67, lng: 126.84, name: "길 1", category: "road", },
-  { lat: 37.64, lng: 126.82, name: "길 2", category: "road", },
-]
-
-
+const parkings = []
+const lifts = []
+const toilets = []
+const steps = []
 
 export default function Map() {
   
@@ -38,29 +26,49 @@ export default function Map() {
   
   const [markers, setMarkers] = useState([]); // 클릭한 곳의 마커좌표 저장
   const [selected, setSelected] = useState(null); // 어떤 마커가 선택됐는지
-  const [parkingVisible, setParkingVisible] = useState(false);
+
+  const [parkingsVisible, setParkingsVisible] = useState(true);
+  const [liftsVisible, setLiftVisible] = useState(true);
+  const [toiletsVisible, setToiletsVisible] = useState(true);
+  const [stepsVisible, setStepsVisible] = useState(true);
   
-  useEffect(() => { 
-    var res = getAllMarkers();
-    res.then(response => response.data.result.map(
-      x => serverPoints.push(
+
+  useEffect(() => {
+    axios.get('http://3.39.217.105:3000/lifts')
+      .then(response => response.data.result.map(
+      x => lifts.push(
         {
           lat: x.coordinates.lat,
           lng: x.coordinates.lon,
-          name: x.name,
-          category: x.category,
+          name: "승강기",
+          category: "lifts",
         }
-      )
-    ))
-    .catch(new Error())
-    console.log(res)
+      ))
+    )
+      .catch(new Error())
+    
+    axios.get('http://3.39.217.105:3000/steps')
+      .then(response => response.data.result.map(
+      x => steps.push(
+        {
+          lat: x.coordinates.lat,
+          lng: x.coordinates.lon,
+          name: "단차",
+          category: "steps",
+        }
+      ))
+    )
+      .catch(new Error())
+    
   }, [])
+
+
 
   const onMapClick = useCallback((event) => {
     setMarkers(current => [...current,{
       lat: event.latLng.lat(),
       lng: event.latLng.lng(),
-      //time: new Data(),// 키값을 어떻게 넣지
+     // 키값을 어떻게 넣지
     }]);
   }, []);
 
@@ -74,41 +82,58 @@ export default function Map() {
 
   return <div>
     <button
-      onClick={() => {setParkingVisible(!parkingVisible);}}
+      onClick={() => {setParkingsVisible(!parkingsVisible);}}
     >주차창 보기</button>
+    <button
+      onClick={() => {setLiftVisible(!liftsVisible);}}
+    >승강기 보기</button>
+    <button
+      onClick={() => {setToiletsVisible(!toiletsVisible);}}
+    >화장실 보기</button>
+    <button
+      onClick={() => {setStepsVisible(!stepsVisible);}}
+    >단차 보기</button>
     <GoogleMap
       mapContainerStyle={mapContainerStyle}
-      zoom={13}
+      zoom={16}
       center={center}
       options={options} //useMemo 를 써써 해보기
       onClick={onMapClick}
       onLoad={onMapLoad}
     >
       
-      {console.log(serverPoints)}
-      {/* {serverPoints.map(marker =>
-        <Marker
+      {lifts.map(marker =>
+          !liftsVisible ? null : <Marker
           key={parseFloat(marker.lat)}
           position={{ lat: parseFloat(marker.lat), lng: parseFloat(marker.lng) }}
-          onClick={() => {
-            setSelected(marker);
+          icon={{
+            url: "https://cdn-icons-png.flaticon.com/512/2084/2084189.png",
+            scaledSize: new window.google.maps.Size(30, 30),
+            origin: new window.google.maps.Point(0, 0),
+            anchor: new window.google.maps.Point(15,15)
           }}
-        />
-      )} */}
-
-      {/* {console.log(parkingVisible)} */}
-      {serverPoints.map(marker =>
-          marker.category === 'parking' && !parkingVisible ? null : <Marker
-          key={parseFloat(marker.lat)}
-          position={{ lat: parseFloat(marker.lat), lng: parseFloat(marker.lng) }}
           onClick={() => {
             setSelected(marker);// 마커 좌표 저장
           }}
         />
       )}
 
+      {steps.map(marker =>
+          !stepsVisible ? null : <Marker
+          key={parseFloat(marker.lat)}
+          position={{ lat: parseFloat(marker.lat), lng: parseFloat(marker.lng) }}
+          icon={{
+            url: "https://cdn-icons.flaticon.com/png/512/3756/premium/3756730.png?token=exp=1654946100~hmac=7a092751cd5f89c7ad653d72ec9a51d0",
+            scaledSize: new window.google.maps.Size(30, 30),
+            origin: new window.google.maps.Point(0, 0),
+            anchor: new window.google.maps.Point(15,15)
+          }}
+          onClick={() => {
+            setSelected(marker);// 마커 좌표 저장
+          }}
+        />
+      )}
 
-      {/* 임시주석 얘 기능하는 것 지우면 안 됨 */}
       {markers.map(marker =>
         <Marker
           key={parseFloat(marker.lat)}
