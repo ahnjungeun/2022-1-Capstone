@@ -1,7 +1,6 @@
 import React, { useState, useCallback, useRef,useEffect } from 'react'
 import { GoogleMap, useLoadScript, Marker, Polyline, InfoWindow, Data } from '@react-google-maps/api';
-import axios from "axios"
-
+import useFetch from '../hooks/useFetch';
 
 const mapContainerStyle = {
   width: "100vw", height: "100vh",
@@ -12,11 +11,6 @@ const center = {
 const options = {
   disableDefaultUI: true, zoomControl: true
 }
-
-const parkings = []
-const lifts = []
-const toilets = []
-const steps = []
 
 export default function Map() {
   
@@ -32,36 +26,10 @@ export default function Map() {
   const [toiletsVisible, setToiletsVisible] = useState(true);
   const [stepsVisible, setStepsVisible] = useState(true);
   
-
-  useEffect(() => {
-    axios.get('http://3.39.217.105:3000/lifts')
-      .then(response => response.data.result.map(
-      x => lifts.push(
-        {
-          lat: x.coordinates.lat,
-          lng: x.coordinates.lon,
-          name: "승강기",
-          category: "lifts",
-        }
-      ))
-    )
-      .catch(new Error())
-    
-    axios.get('http://3.39.217.105:3000/steps')
-      .then(response => response.data.result.map(
-      x => steps.push(
-        {
-          lat: x.coordinates.lat,
-          lng: x.coordinates.lon,
-          name: "단차",
-          category: "steps",
-        }
-      ))
-    )
-      .catch(new Error())
-    
-  }, [])
-
+  const steps = useFetch('/steps')
+  const lifts = useFetch('/lifts')
+  const parkings = useFetch('/parkings')
+  const toilets = useFetch('/toilets')
 
 
   const onMapClick = useCallback((event) => {
@@ -82,17 +50,27 @@ export default function Map() {
 
   return <div>
     <button
-      onClick={() => {setParkingsVisible(!parkingsVisible);}}
+      onClick={() => {
+        setParkingsVisible(!parkingsVisible);
+        setSelected(null);
+      }}
     >주차창 보기</button>
     <button
-      onClick={() => {setLiftVisible(!liftsVisible);}}
+      onClick={() => {
+        setLiftVisible(!liftsVisible);
+        setSelected(null);}}
     >승강기 보기</button>
     <button
-      onClick={() => {setToiletsVisible(!toiletsVisible);}}
+      onClick={() => {
+        setToiletsVisible(!toiletsVisible);
+        setSelected(null);}}
     >화장실 보기</button>
     <button
-      onClick={() => {setStepsVisible(!stepsVisible);}}
+      onClick={() => {
+        setStepsVisible(!stepsVisible);
+        setSelected(null);}}
     >단차 보기</button>
+
     <GoogleMap
       mapContainerStyle={mapContainerStyle}
       zoom={16}
@@ -106,12 +84,12 @@ export default function Map() {
           !liftsVisible ? null : <Marker
           key={parseFloat(marker.lat)}
           position={{ lat: parseFloat(marker.lat), lng: parseFloat(marker.lng) }}
-          icon={{
-            url: "https://cdn-icons-png.flaticon.com/512/2084/2084189.png",
-            scaledSize: new window.google.maps.Size(30, 30),
-            origin: new window.google.maps.Point(0, 0),
-            anchor: new window.google.maps.Point(15,15)
-          }}
+          // icon={{
+          //   url: "https://cdn-icons-png.flaticon.com/512/2084/2084189.png",
+          //   scaledSize: new window.google.maps.Size(30, 30),
+          //   origin: new window.google.maps.Point(0, 0),
+          //   anchor: new window.google.maps.Point(15,15)
+          // }}
           onClick={() => {
             setSelected(marker);// 마커 좌표 저장
           }}
@@ -122,12 +100,12 @@ export default function Map() {
           !stepsVisible ? null : <Marker
           key={parseFloat(marker.lat)}
           position={{ lat: parseFloat(marker.lat), lng: parseFloat(marker.lng) }}
-          icon={{
-            url: "https://cdn-icons.flaticon.com/png/512/3756/premium/3756730.png?token=exp=1654946100~hmac=7a092751cd5f89c7ad653d72ec9a51d0",
-            scaledSize: new window.google.maps.Size(30, 30),
-            origin: new window.google.maps.Point(0, 0),
-            anchor: new window.google.maps.Point(15,15)
-          }}
+          // icon={{
+          //   url: "https://cdn-icons.flaticon.com/png/512/3756/premium/3756730.png?token=exp=1654946100~hmac=7a092751cd5f89c7ad653d72ec9a51d0",
+          //   scaledSize: new window.google.maps.Size(30, 30),
+          //   origin: new window.google.maps.Point(0, 0),
+          //   anchor: new window.google.maps.Point(15,15)
+          // }}
           onClick={() => {
             setSelected(marker);// 마커 좌표 저장
           }}

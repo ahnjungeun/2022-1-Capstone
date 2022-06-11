@@ -1,11 +1,9 @@
 import './App.css';
-import MyComponent from './MyComponent';
-import Map from './Map'
+import Map from './components/Map'
 
 export default function App() {
   return (
     <div>
-      {/* <MyComponent /> */}
       <Map/>
     </div>
   );
