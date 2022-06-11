@@ -112,6 +112,38 @@ export default function Map() {
         />
       )}
 
+      {parkings.map(marker =>
+          !parkingsVisible ? null : <Marker
+          key={parseFloat(marker.lat)}
+          position={{ lat: parseFloat(marker.lat), lng: parseFloat(marker.lng) }}
+          // icon={{
+          //   url: "https://cdn-icons.flaticon.com/png/512/3756/premium/3756730.png?token=exp=1654946100~hmac=7a092751cd5f89c7ad653d72ec9a51d0",
+          //   scaledSize: new window.google.maps.Size(30, 30),
+          //   origin: new window.google.maps.Point(0, 0),
+          //   anchor: new window.google.maps.Point(15,15)
+          // }}
+          onClick={() => {
+            setSelected(marker);// 마커 좌표 저장
+          }}
+        />
+      )}
+
+      {toilets.map(marker =>
+          !toiletsVisible ? null : <Marker
+          key={parseFloat(marker.lat)}
+          position={{ lat: parseFloat(marker.lat), lng: parseFloat(marker.lng) }}
+          // icon={{
+          //   url: "https://cdn-icons.flaticon.com/png/512/3756/premium/3756730.png?token=exp=1654946100~hmac=7a092751cd5f89c7ad653d72ec9a51d0",
+          //   scaledSize: new window.google.maps.Size(30, 30),
+          //   origin: new window.google.maps.Point(0, 0),
+          //   anchor: new window.google.maps.Point(15,15)
+          // }}
+          onClick={() => {
+            setSelected(marker);// 마커 좌표 저장
+          }}
+        />
+      )}
+
       {markers.map(marker =>
         <Marker
           key={parseFloat(marker.lat)}
